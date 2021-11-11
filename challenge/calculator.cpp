@@ -64,16 +64,7 @@ void var_declarer(string var_name, string value, bool is_double) {
 
 //Returns value of given variable if exist
 string var_finder(string var_name) {
-    if (var_name[0] == '0' ||
-        var_name[0] == '1' ||
-        var_name[0] == '2' ||
-        var_name[0] == '3' ||
-        var_name[0] == '4' ||
-        var_name[0] == '5' ||
-        var_name[0] == '6' ||
-        var_name[0] == '7' ||
-        var_name[0] == '8' ||
-        var_name[0] == '9') return var_name;
+    if (var_name[0] >= '0' && var_name[0] <= '9') return var_name;
     if(var_name[0] == '-') {
         string act_value = var_finder(var_name.substr(1));
         if(count(act_value.begin(), act_value.end(), '.')) {
@@ -97,46 +88,37 @@ string var_finder(string var_name) {
     return "0";
 }
 
-string division(string left_side, string right_side) {
+enum operator = {division, multiplication, addition, subtraction};
+string processor(string left_side, string right_side, operator op) {
     left_side = var_finder(left_side);
     right_side = var_finder(right_side);
     string both = left_side + right_side;
-    if (count(both.begin(), both.end(), '.') > 0) {
-        return to_string(stod(left_side) / stod(right_side));
+    switch op{
+        case multiplication:
+            if (count(both.begin(), both.end(), '.') > 0)
+                return to_string(stod(left_side) * stod(right_side));
+            else
+                return to_string(stoi(left_side) * stoi(right_side));
+            break;
+        case division:
+            if (count(both.begin(), both.end(), '.') > 0)
+                return to_string(stod(left_side) / stod(right_side));
+            else
+                return to_string(stoi(left_side) / stoi(right_side));
+            break;
+        case addition:
+            if (count(both.begin(), both.end(), '.') > 0)
+                return to_string(stod(left_side) + stod(right_side));
+            else
+                return to_string(stoi(left_side) + stoi(right_side));
+            break;
+        case subtraction:
+            if (count(both.begin(), both.end(), '.') > 0)
+                return to_string(stod(left_side) - stod(right_side));
+            else
+                return to_string(stoi(left_side) - stoi(right_side));
+            break;
     }
-    else {
-        return to_string(stoi(left_side) / stoi(right_side));
-    }
-}
-
-string multiplication(string left_side, string right_side) {
-    left_side = var_finder(left_side);
-    right_side = var_finder(right_side);
-    string both = left_side + right_side;
-    if (count(both.begin(), both.end(), '.') > 0) {
-        return to_string(stod(left_side) * stod(right_side));
-    }
-    else {
-        return to_string(stoi(left_side) * stoi(right_side));
-    }
-}
-
-string addition(string left_side, string right_side) {
-    left_side = var_finder(left_side);
-    right_side = var_finder(right_side);
-    string both = left_side + right_side;
-    if (count(both.begin(), both.end(), '.') > 0) {
-        return to_string(stod(left_side) + stod(right_side));
-    }
-    else {
-        return to_string(stoi(left_side) + stoi(right_side));
-    }
-}
-
-string subtraction(string left_side, string right_side) {
-    left_side = var_finder(left_side);
-    right_side = var_finder(right_side);
-    string both = left_side + right_side;
     if (count(both.begin(), both.end(), '.') > 0) {
         return to_string(stod(left_side) - stod(right_side));
     }
@@ -166,7 +148,7 @@ string calculator(string line) {
             counter++;
         }
         string right_side = line.substr(line.find_first_of('/') + 1, counter - line.find_first_of('/'));
-        return calculator(line.replace(left_side_index, left_side.length() + right_side.length() + 1, division(left_side, right_side)));
+        return calculator(line.replace(left_side_index, left_side.length() + right_side.length() + 1, processor(left_side, right_side, division)));
     }
     else if (count(line.begin(), line.end(), '*') > 0) {
         int counter = line.find_first_of('*');
@@ -181,7 +163,7 @@ string calculator(string line) {
             counter++;
         }
         string right_side = line.substr(line.find_first_of('*') + 1, counter - line.find_first_of('*'));
-        return calculator(line.replace(left_side_index, left_side.length() + right_side.length() + 1, multiplication(left_side, right_side)));
+        return calculator(line.replace(left_side_index, left_side.length() + right_side.length() + 1, processor(left_side, right_side, multiplication)));
     }
     else if (count(line.begin(), line.end(), '-') > 0 && line[0] != '-') {
         int counter = line.find_first_of('-');
@@ -195,7 +177,7 @@ string calculator(string line) {
             counter++;
         }
         string right_side = line.substr(line.find_first_of('-') + 1, counter - line.find_first_of('-'));
-        return calculator(line.replace(left_side_index, left_side.length() + right_side.length() + 1, subtraction(left_side, right_side)));
+        return calculator(line.replace(left_side_index, left_side.length() + right_side.length() + 1, processor(left_side, right_side, subtraction)));
     }
     else if (count(line.begin(), line.end(), '+') > 0) {
         int counter = line.find_first_of('+');
@@ -209,11 +191,11 @@ string calculator(string line) {
             counter++;
         }
         string right_side = line.substr(line.find_first_of('+') + 1, counter - line.find_first_of('+'));
-        return calculator(line.replace(left_side_index, left_side.length() + right_side.length() + 1, addition(left_side, right_side)));
+        return calculator(line.replace(left_side_index, left_side.length() + right_side.length() + 1, processor(left_side, right_side, addition)));
     }
     else {
-        if(line[0] == '-') return multiplication("-1", line.substr(1));
-        return line;
+        if(line[0] == '-') return processor("-1", line.substr(1), multiplication);
+            return line;
     }
 }
 

@@ -88,12 +88,12 @@ string var_finder(string var_name) {
     return "0";
 }
 
-enum operator = {division, multiplication, addition, subtraction};
-string processor(string left_side, string right_side, operator op) {
+enum Operator {division, multiplication, addition, subtraction};
+string processor(string left_side, string right_side, Operator op) {
     left_side = var_finder(left_side);
     right_side = var_finder(right_side);
     string both = left_side + right_side;
-    switch op{
+    switch(op){
         case multiplication:
             if (count(both.begin(), both.end(), '.') > 0)
                 return to_string(stod(left_side) * stod(right_side));
